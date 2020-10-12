@@ -5,8 +5,23 @@
         if(substr($scriptOutput, -3) !== "pdf") {
             $errorMessage = $scriptOutput;
         } else {
-            header("Location: " . $scriptOutput);
-            die();
+            $filePath = $scriptOutput;
+            $file = fopen($filePath, "r");
+
+            header("Cache-Control: maxage=1");
+            header("Pragma: public");
+            header("Content-type: application/pdf");
+            header("Content-Disposition: inline; filename=wyklady.pdf");
+            header("Content-Description: PHP Generated Data");
+            header("Content-Transfer-Encoding: binary");
+            header('Content-Length:' . filesize($filePath));
+            ob_clean();
+            flush();
+            while (!feof($file)) {
+                $buff = fread($file, 1024);
+                print $buff;
+            }
+            exit;
         }
     }
 ?>

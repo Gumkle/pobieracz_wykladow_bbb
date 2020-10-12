@@ -1,4 +1,5 @@
-import subprocess
+import shutil
+from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from urllib.error import HTTPError
@@ -7,6 +8,12 @@ import sys
 import itertools
 import os
 import hashlib
+
+from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
+from reportlab.graphics import renderPM, renderPDF
+from reportlab.pdfgen import canvas
+from reportlab.platypus import SimpleDocTemplate
+from svglib.svglib import svg2rlg
 
 
 def is_url_bbb(url):
@@ -40,8 +47,32 @@ def create_dir_with_name(dir_name):
             exit(2)
 
 
-def make_zip_from_dir(dir_name, pdf_name):
-    subprocess.run(['convert', f'{dir_name}/*.svg', pdf_name])
+def make_pdf_from_dir(dir_name, pdf_name):
+    result_dir_path = Path(dir_name)
+    merger = PdfFileMerger()
+    pdfs = []
+    for file in result_dir_path.iterdir():
+        if file.suffix == ".svg":
+            image = svg2rlg(str(file))
+            subpdf_name = str(file).replace(".svg", ".pdf")
+            renderPDF.drawToFile(image, subpdf_name)
+            pdfs.append(subpdf_name)
+    pdfs.sort()
+    for pdf in pdfs:
+        merger.append(pdf)
+    merger.write(pdf_name)
+    merger.close()
+
+
+def remove_content_older_than(minutes, dir_name):
+    dir = Path(dir_name)
+    now = int(datetime.now().timestamp())
+    for child in dir.iterdir():
+        if now - child.stat().st_ctime > int(minutes * 60):
+            if child.is_dir():
+                shutil.rmtree(str(child))
+            else:
+                child.unlink()
 
 
 if __name__ == "__main__":
@@ -50,10 +81,11 @@ if __name__ == "__main__":
         print("Podany link jest nieprawidłowy")
         exit(1)
     url_without_number = "/".join(url.split("/")[:-1])
-    dir = hashlib.md5(datetime.now().strftime("%H:%M:%S").encode('utf-8')).hexdigest()
+    results_dir_name = "results"
+    remove_content_older_than(minutes=1, dir_name=results_dir_name)
+    dir = results_dir_name + "/" + hashlib.md5(datetime.now().strftime("%H:%M:%S").encode('utf-8')).hexdigest()
     create_dir_with_name(dir_name=dir)
     save_files_to_dir(dir_name=dir, url=url_without_number)
     pdf_file_name = '{}/{}.pdf'.format(dir, "wyklady")
-    make_zip_from_dir(dir_name=dir, pdf_name=pdf_file_name)
+    make_pdf_from_dir(dir_name=dir, pdf_name=pdf_file_name)
     print(pdf_file_name)
-

@@ -15,6 +15,7 @@
             header("Content-Description: PHP Generated Data");
             header("Content-Transfer-Encoding: binary");
             header('Content-Length:' . filesize($filePath));
+
             ob_clean();
             flush();
             while (!feof($file)) {

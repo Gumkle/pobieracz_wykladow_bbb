@@ -1,8 +1,13 @@
 <?php
     if($_SERVER["REQUEST_METHOD"] === "POST" && !empty($_POST["link"])) {
-        $pdfName = "python3.8 ./generatePdf.py \"{$_POST['link']}\"";
-        header("Location: $pdfName");
-        die();
+        $scriptOutput = trim(shell_exec("python3.8 ./script.py \"{$_POST['link']}\""));
+        $errorMessage = null;
+        if(substr($scriptOutput, -3) !== "pdf") {
+            $errorMessage = $scriptOutput;
+        } else {
+            header("Location: " . $scriptOutput);
+            die();
+        }
     }
 ?>
 <!DOCTYPE html>
@@ -12,10 +17,11 @@
     <title>Downloader</title>
 </head>
 <body>
+    <span style="color: red;"><?= $errorMessage ?></span>
     <form method="POST" action="index.php">
         <label for="link">Podaj link źródła prezentacji</label>
         <input type="text" name="link" id="link">
-        <input type="submit" value="Pobierz zip">
+        <input type="submit" value="Pobierz pdf">
     </form>
 </body>
 </html>

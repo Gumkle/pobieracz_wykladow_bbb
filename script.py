@@ -9,10 +9,8 @@ import itertools
 import os
 import hashlib
 
-from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
-from reportlab.graphics import renderPM, renderPDF
-from reportlab.pdfgen import canvas
-from reportlab.platypus import SimpleDocTemplate
+from PyPDF2 import PdfFileMerger
+from reportlab.graphics import renderPDF
 from svglib.svglib import svg2rlg
 
 

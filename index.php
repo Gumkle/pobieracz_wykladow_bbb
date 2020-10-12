@@ -1,6 +1,6 @@
 <?php
     if($_SERVER["REQUEST_METHOD"] === "POST" && !empty($_POST["link"])) {
-        $scriptOutput = trim(shell_exec("python3.8 ./script.py \"{$_POST['link']}\""));
+        $scriptOutput = trim(shell_exec("./venv/bin/python3 ./script.py \"{$_POST['link']}\""));
         $errorMessage = null;
         if(substr($scriptOutput, -3) !== "pdf") {
             $errorMessage = $scriptOutput;

@@ -7,8 +7,6 @@ from datetime import datetime
 import sys
 import itertools
 import os
-import hashlib
-
 from PyPDF2 import PdfFileMerger
 from reportlab.graphics import renderPDF
 from svglib.svglib import svg2rlg
@@ -73,17 +71,19 @@ def remove_content_older_than(minutes, dir_name):
                 child.unlink()
 
 
-if __name__ == "__main__":
-    url = sys.argv[1]
+def process_request(url, hash_name):
     if not is_url_bbb(url):
         print("Podany link jest nieprawidłowy")
         exit(1)
     url_without_number = "/".join(url.split("/")[:-1])
     results_dir_name = "results"
     remove_content_older_than(minutes=1, dir_name=results_dir_name)
-    dir = results_dir_name + "/" + hashlib.md5(datetime.now().strftime("%H:%M:%S").encode('utf-8')).hexdigest()
+    dir = results_dir_name + "/" + hash_name
     create_dir_with_name(dir_name=dir)
     save_files_to_dir(dir_name=dir, url=url_without_number)
     pdf_file_name = '{}/{}.pdf'.format(dir, "wyklady")
     make_pdf_from_dir(dir_name=dir, pdf_name=pdf_file_name)
-    print(pdf_file_name)
+
+
+if __name__ == "__main__":
+    process_request(sys.argv[1], sys.argv[2])

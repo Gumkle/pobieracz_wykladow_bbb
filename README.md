@@ -1,6 +1,3 @@
-## Requirements
-python3.8 and imagemagick (convert command)
-
 ## installation
 - install python venv: `python3.8 -m venv venv`
 - `source venv/bin/activate `
